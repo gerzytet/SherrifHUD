@@ -2,17 +2,22 @@ import math
 import PySimpleGUI as sg
 
 FONT = 'Helvetica'
+messages = [
+    "The Joker is on the loose!",
+    "Florida Polytechnic University got invaded by raccoons",
+    "A giant chicken is terrorizing Lakeland",
+]
 # Define the layout
 layout = [
     # Row for the two text boxes, with a large font
-    [sg.Text('Dispatcher messages:', size=(60, 1), font=(FONT, 18))],
-    [sg.Text('A message', size=(60, 1), font=(FONT, 18))],
+    [sg.Text('Dispatcher messages:', size=(60, 1), font=(FONT, 36))],
+    [sg.Text('The Joker is on the loose!', key="message", size=(60, 2), font=(FONT, 36))],
 
     # Spacer between the text boxes and the bottom text line
     [sg.VPush()],
 
     # Row for the bottom line of text
-    [sg.vbottom([sg.Text('Coordinates: ', key='coords', size=(40, 1), justification='left', font=(FONT, 14)), sg.Push(), sg.Text('Coordinates: ', key='intersection', size=(40, 1), justification='right', font=(FONT, 14))])],
+    [sg.vbottom([sg.Text('Coordinates: ', key='coords', size=(20, 1), justification='left', font=(FONT, 28)), sg.Push(), sg.Text('Coordinates: ', key='intersection', size=(30, 1), justification='right', font=(FONT, 28))])],
 
     [sg.Button('QUIT')]
 ]
@@ -51,6 +56,8 @@ while True:
     window['coords'].update(f'Coordinates: {coords}')
     distance, color, pos = nearest_intersection(coords)
     window['intersection'].update(f'Nearest Intersection: {color} at {pos}')
+
+    window['message'].update(messages[int(t/4) % len(messages)])
 
 # Close the window
 window.close()
