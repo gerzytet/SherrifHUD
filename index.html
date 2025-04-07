@@ -3,19 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispatch Input</title>
+    <title>Dispatch Input v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .drop-zone {
             border: 2px dashed #ccc;
-            padding: 40px;
+            padding: 30px; /* Reduced padding */
             text-align: center;
             transition: background-color 0.2s ease;
+            min-height: 100px; /* Ensure drop zone has height */
         }
         .drop-zone.drag-over {
             background-color: #e0e0e0;
             border-color: #aaa;
         }
+        #staged-files-list li {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+         #staged-files-list button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+         }
+         #staged-files-list button:hover {
+            background-color: #c82333;
+         }
         /* Basic styling for status messages */
         .status-success { color: green; }
         .status-error { color: red; }
@@ -23,105 +48,110 @@
 </head>
 <body class="bg-gray-100 p-8 font-sans">
 
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-4 text-center">Dispatch Data Input</h1>
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-6 text-center">Dispatch Data Input v2</h1>
 
-        <div class="mb-6">
-            <label for="officer-select" class="block text-sm font-medium text-gray-700 mb-1">Target Officer:</label>
-            <select id="officer-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="Officer_A">Officer A</option>
-                <option value="Officer_B">Officer B</option>
-                <option value="Officer_C">Officer C</option>
-            </select>
-        </div>
-
-        <div class="mb-6">
-            <label for="text-update" class="block text-sm font-medium text-gray-700 mb-1">Text Update:</label>
-            <textarea id="text-update" rows="3" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type or paste update text here..."></textarea>
-            <button id="send-text-btn" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Send Text Update</button>
-            <p id="text-status" class="text-sm mt-1"></p>
-        </div>
-
-        <div class="mb-6">
-             <label class="block text-sm font-medium text-gray-700 mb-1">Image Upload:</label>
-            <div id="image-drop-zone" class="drop-zone rounded-md">
-                <p>Drag & Drop Image Here or Click to Select</p>
-                <input type="file" id="image-input" accept="image/*" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="officer-select" class="block text-sm font-medium text-gray-700 mb-1">Target Officer:</label>
+                <select id="officer-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="Officer_A">Officer A</option>
+                    <option value="Officer_B">Officer B</option>
+                    <option value="Officer_C">Officer C</option>
+                </select>
             </div>
-             <p id="image-status" class="text-sm mt-1"></p>
+             <div>
+                <label for="call-id-select" class="block text-sm font-medium text-gray-700 mb-1">Target Call ID:</label>
+                <select id="call-id-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="CALL_101">CALL_101</option>
+                    <option value="CALL_102">CALL_102</option>
+                    <option value="NEW_CALL">** New Call **</option>
+                    </select>
+            </div>
         </div>
+
+        <div class="mb-6">
+            <label for="text-update" class="block text-sm font-medium text-gray-700 mb-1">Text Update(s):</label>
+            <textarea id="text-update" rows="4" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type or paste update text here (multiple lines allowed)..."></textarea>
+        </div>
+
+        <div class="mb-6">
+             <label class="block text-sm font-medium text-gray-700 mb-1">Stage Images:</label>
+            <div id="image-drop-zone" class="drop-zone rounded-md bg-gray-50">
+                <p class="text-gray-500">Drag & Drop Images Here or Click to Select</p>
+                <input type="file" id="image-input" accept="image/*" class="hidden" multiple> </div>
+             <div class="mt-3">
+                <h3 class="text-sm font-medium text-gray-700 mb-1">Staged Images:</h3>
+                <ul id="staged-files-list" class="list-none p-0 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-2 bg-white">
+                    <li id="no-files-staged" class="text-gray-400 italic">No images staged yet.</li>
+                </ul>
+             </div>
+        </div>
+
+         <div class="text-center mt-6">
+             <button id="submit-all-btn" class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-lg font-semibold">
+                 Submit Call Data (Text & Staged Images)
+             </button>
+             <p id="submit-status" class="text-sm mt-2"></p>
+         </div>
 
     </div>
 
     <script>
         const officerSelect = document.getElementById('officer-select');
+        const callIdSelect = document.getElementById('call-id-select');
         const textInput = document.getElementById('text-update');
-        const sendTextBtn = document.getElementById('send-text-btn');
-        const textStatus = document.getElementById('text-status');
-
         const imageDropZone = document.getElementById('image-drop-zone');
         const imageInput = document.getElementById('image-input');
-        const imageStatus = document.getElementById('image-status');
+        const stagedFilesList = document.getElementById('staged-files-list');
+        const noFilesStagedMsg = document.getElementById('no-files-staged');
+        const submitAllBtn = document.getElementById('submit-all-btn');
+        const submitStatus = document.getElementById('submit-status');
 
         const backendUrl = 'http://127.0.0.1:5000/upload'; // Backend server address
+        let stagedFiles = []; // Array to hold File objects
 
-        // --- Text Sending ---
-        sendTextBtn.addEventListener('click', () => {
-            const text = textInput.value.trim();
-            const officerId = officerSelect.value;
-            if (!text) {
-                textStatus.textContent = 'Please enter text.';
-                textStatus.className = 'status-error';
-                return;
+        // --- Staging Files Logic ---
+        function addFileToStaging(file) {
+            if (!file.type.startsWith('image/')) return; // Only images
+            stagedFiles.push(file);
+            renderStagedFiles();
+        }
+
+        function removeFileFromStaging(index) {
+            stagedFiles.splice(index, 1);
+            renderStagedFiles();
+        }
+
+        function renderStagedFiles() {
+            stagedFilesList.innerHTML = ''; // Clear list
+            if (stagedFiles.length === 0) {
+                stagedFilesList.appendChild(noFilesStagedMsg); // Show placeholder
+            } else {
+                stagedFiles.forEach((file, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.onclick = () => removeFileFromStaging(index);
+                    li.appendChild(removeBtn);
+                    stagedFilesList.appendChild(li);
+                });
             }
-            if (!officerId) {
-                 textStatus.textContent = 'Please select an officer.';
-                 textStatus.className = 'status-error';
-                 return;
-            }
+        }
 
-            textStatus.textContent = 'Sending...';
-            textStatus.className = '';
-
-            const formData = new FormData();
-            formData.append('officer_id', officerId);
-            formData.append('text_update', text);
-
-            fetch(backendUrl, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    textStatus.textContent = `Text sent to ${officerId} successfully!`;
-                    textStatus.className = 'status-success';
-                    textInput.value = ''; // Clear input
-                } else {
-                    textStatus.textContent = `Error: ${data.error || 'Unknown error'}`;
-                    textStatus.className = 'status-error';
-                }
-            })
-            .catch(error => {
-                console.error('Error sending text:', error);
-                textStatus.textContent = 'Error sending text. Is the backend server running?';
-                textStatus.className = 'status-error';
-            });
-        });
-
-        // --- Image Upload Logic ---
+        // --- Event Listeners ---
 
         // Prevent default drag behaviors
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             imageDropZone.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false); // Prevent browser opening file
+            document.body.addEventListener(eventName, preventDefaults, false);
         });
 
-        // Highlight drop zone when item is dragged over it
+        // Highlight drop zone
         ['dragenter', 'dragover'].forEach(eventName => {
             imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over'), false);
         });
-
         ['dragleave', 'drop'].forEach(eventName => {
             imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over'), false);
         });
@@ -129,10 +159,8 @@
         // Handle dropped files
         imageDropZone.addEventListener('drop', handleDrop, false);
 
-        // Handle click to select file
-        imageDropZone.addEventListener('click', () => {
-            imageInput.click();
-        });
+        // Handle click to select files
+        imageDropZone.addEventListener('click', () => imageInput.click());
         imageInput.addEventListener('change', function() {
              if (this.files && this.files.length > 0) {
                 handleFiles(this.files);
@@ -140,7 +168,10 @@
              }
         });
 
+        // Handle Submit Button Click
+        submitAllBtn.addEventListener('click', handleSubmit);
 
+        // --- Helper Functions ---
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -153,35 +184,47 @@
         }
 
         function handleFiles(files) {
-            if (files.length === 0) {
-                imageStatus.textContent = 'No file selected.';
-                imageStatus.className = 'status-error';
-                return;
-            }
-            // We only handle the first file dropped/selected
-            const file = files[0];
-            if (!file.type.startsWith('image/')) {
-                 imageStatus.textContent = 'Only image files are allowed.';
-                 imageStatus.className = 'status-error';
-                 return;
-            }
-            uploadFile(file);
+            submitStatus.textContent = ''; // Clear previous status
+            submitStatus.className = '';
+            // Add valid image files to staging
+            [...files].forEach(addFileToStaging);
         }
 
-        function uploadFile(file) {
+        function handleSubmit() {
             const officerId = officerSelect.value;
-             if (!officerId) {
-                 imageStatus.textContent = 'Please select an officer.';
-                 imageStatus.className = 'status-error';
+            let callId = callIdSelect.value; // Can be "NEW_CALL"
+            const text = textInput.value; // Send even if empty/whitespace
+
+            if (!officerId) {
+                 submitStatus.textContent = 'Please select an officer.';
+                 submitStatus.className = 'status-error';
+                 return;
+             }
+             if (!callId) { // Should not happen with select, but check anyway
+                 submitStatus.textContent = 'Please select a Call ID or "New Call".';
+                 submitStatus.className = 'status-error';
                  return;
              }
 
-            imageStatus.textContent = 'Uploading...';
-            imageStatus.className = '';
+            // Check if there's anything to send
+            if (text.trim().length === 0 && stagedFiles.length === 0) {
+                submitStatus.textContent = 'Nothing to submit (no text or staged images).';
+                submitStatus.className = 'status-error';
+                return;
+            }
+
+            submitStatus.textContent = 'Submitting...';
+            submitStatus.className = '';
 
             const formData = new FormData();
             formData.append('officer_id', officerId);
-            formData.append('image_file', file); // Key matches Flask expectation
+            formData.append('call_id', callId); // Send selected value ("NEW_CALL" if chosen)
+            formData.append('text_update', text); // Send text content
+
+            // Append all staged files
+            stagedFiles.forEach((file) => {
+                formData.append('image_files', file); // Use the same key for all files
+            });
 
             fetch(backendUrl, {
                 method: 'POST',
@@ -190,19 +233,32 @@
             .then(response => response.json())
             .then(data => {
                  if (data.success) {
-                    imageStatus.textContent = `Image "${file.name}" sent to ${officerId} successfully!`;
-                    imageStatus.className = 'status-success';
+                    let successMsg = `Data sent to ${officerId}`;
+                    if (data.call_id) {
+                        successMsg += ` (Call ID: ${data.call_id})`; // Show generated ID if new
+                        // Optional: Add the new Call ID to the dropdown?
+                        // Maybe refresh page or add dynamically if needed often
+                    }
+                    successMsg += ` successfully!`;
+                    submitStatus.textContent = successMsg;
+                    submitStatus.className = 'status-success';
+                    textInput.value = ''; // Clear text input
+                    stagedFiles = []; // Clear staged files
+                    renderStagedFiles(); // Update UI list
                 } else {
-                    imageStatus.textContent = `Error: ${data.error || 'Unknown error'}`;
-                    imageStatus.className = 'status-error';
+                    submitStatus.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    submitStatus.className = 'status-error';
                 }
             })
             .catch(error => {
-                console.error('Error uploading file:', error);
-                imageStatus.textContent = 'Error uploading file. Is the backend server running?';
-                imageStatus.className = 'status-error';
+                console.error('Error submitting data:', error);
+                submitStatus.textContent = 'Error submitting data. Is the backend server running?';
+                submitStatus.className = 'status-error';
             });
         }
+
+        // Initial render in case of page refresh with state (though unlikely here)
+        renderStagedFiles();
 
     </script>
 
