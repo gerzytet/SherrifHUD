@@ -130,27 +130,30 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # =============================================================================
 
 #New Function to check if it is night or daytime, as well as checking daylight savings time for accurate day-night prediction
+#New Function to check if it is night or daytime, as well as checking daylight savings time for accurate day-night prediction
 def check_time():
-    # Get the system timezone
-    time_zone = QTimeZone(b"US/Pacific")  # QTimeZone takes bytes
+    # Get the system timezone (US/Pacific in this case)
+    time_zone = QTimeZone(b"EST")  # Use correct IANA ID for US/Pacific
 
-    # Get the current date and time (not directly compatible with QTimeZone)
-    date_time = datetime.now().astimezone(pytz.timezone("US/Pacific"))  # Fallback to pytz for datetime
+    # Get the current date and time in the specified time zone
+    date_time = QDateTime.currentDateTime()
 
     # Define daylight (6:00 AM) and night (6:00 PM) for today
-    daylight = datetime.combine(date_time.date(), time(6, 0)).replace(tzinfo=pytz.timezone("US/Pacific"))
-    night = datetime.combine(date_time.date(), time(18, 0)).replace(tzinfo=pytz.timezone("US/Pacific"))
+    today = date_time.date()  # QDate object for today
+    daylight = QDateTime(today, QTime(6, 0), time_zone)  # 6:00 AM today
+    night = QDateTime(today, QTime(18, 0), time_zone)   # 6:00 PM today
 
-    # Check if DST is in effect (using QTimeZone)
-    if time_zone.isDaylightTime(date_time):
-        logging.info("Daylight Saving Time is in effect.")
-    else:
-        logging.info("Daylight Saving Time is not in effect.")
+    # Check if current time is night (after or equal to 6:00 PM) or day (before 6:00 PM)
+    is_night = date_time >= night or date_time < daylight
 
-    # Check if current time is between daylight and night
-    return date_time > night
+    # Check if DST is in effect (for reference, optional)
+    is_dst = time_zone.isDaylightTime(date_time)
+    print(f"DST is {'active' if is_dst else 'not active'}")  # Debugging DST status
 
-def swap_color_palette(): # New Function to swap to light-mode color palette
+    return is_night
+    
+
+def swap_color_palette(bool): # New Function to swap to light-mode color palette
     global COLOR_BACKGROUND
     global COLOR_TEXT_PRIMARY
     global COLOR_TEXT_SECONDARY
@@ -176,30 +179,31 @@ def swap_color_palette(): # New Function to swap to light-mode color palette
     global COLOR_BUTTON_DISABLED_TEXT
     global COLOR_BUTTON_DISABLED_BORDER
     # --- Light Mode Color Palette ---
-    COLOR_BACKGROUND = "#FFFFFF"          # White (replacing black)
-    COLOR_TEXT_PRIMARY = "#1A1A1A"        # Dark Gray (near black for readability)
-    COLOR_TEXT_SECONDARY = "#606060"      # Medium Gray (darker than original secondary)
-    COLOR_ACCENT = "#00BFFF"              # DeepSkyBlue (unchanged, still works in light mode)
-    COLOR_SEPARATOR = COLOR_ACCENT        # DeepSkyBlue (unchanged)
-    COLOR_BOX_BORDER = COLOR_ACCENT       # DeepSkyBlue (unchanged)
-    COLOR_ACTUAL_IMAGE_BORDER = "#000000" # Black (inverted from white)
-    COLOR_UPDATE_TIMESTAMP = "#00CCCC"    # Slightly darker Cyan for better contrast
-    COLOR_TIMESTAMP_TRAFFIC = "#CC9900"   # Darker Yellow (more readable on light BG)
-    COLOR_TIMESTAMP_BOLO = "#E59400"      # Darker Orange (adjusted for light mode)
-    COLOR_CRITICAL_UPDATE = "#CC0000"     # Slightly darker Red (more readable)
-    COLOR_CRITICAL_BG = "#FFCCCC"         # Light Red background (inverted from dark red)
-    COLOR_GPS_LOCKED = "#008000"          # Dark Green (better contrast on light BG)
-    COLOR_GPS_NO_LOCK = COLOR_TEXT_SECONDARY  # Medium Gray (unchanged reference)
-    COLOR_CONN_OK = "#008000"             # Dark Green (better contrast)
-    COLOR_CONN_BAD = COLOR_TEXT_SECONDARY # Medium Gray (unchanged reference)
-    COLOR_STATUS_OK_BG = "#CCFFCC"        # Light Green background (inverted from dark green)
-    COLOR_STATUS_BAD_BG = "#E0E0E0"       # Light Gray background (inverted from dark gray)
-    COLOR_BUTTON_BG = "#D0D0D0"           # Light Gray (lighter than dark mode)
-    COLOR_BUTTON_TEXT = COLOR_TEXT_PRIMARY  # Dark Gray (unchanged reference)
-    COLOR_BUTTON_BORDER = COLOR_ACCENT    # DeepSkyBlue (unchanged)
-    COLOR_BUTTON_DISABLED_BG = "#B0B0B0"  # Medium Gray (lighter disabled state)
-    COLOR_BUTTON_DISABLED_TEXT = "#808080"  # Gray (unchanged, still readable)
-    COLOR_BUTTON_DISABLED_BORDER = "#A0A0A0"  # Lighter Gray (adjusted for light mode)
+    if bool is True:
+        COLOR_BACKGROUND = "#FFFFFF"          # White (replacing black)
+        COLOR_TEXT_PRIMARY = "#1A1A1A"        # Dark Gray (near black for readability)
+        COLOR_TEXT_SECONDARY = "#606060"      # Medium Gray (darker than original secondary)
+        COLOR_ACCENT = "#00BFFF"              # DeepSkyBlue (unchanged, still works in light mode)
+        COLOR_SEPARATOR = COLOR_ACCENT        # DeepSkyBlue (unchanged)
+        COLOR_BOX_BORDER = COLOR_ACCENT       # DeepSkyBlue (unchanged)
+        COLOR_ACTUAL_IMAGE_BORDER = "#000000" # Black (inverted from white)
+        COLOR_UPDATE_TIMESTAMP = "#00CCCC"    # Slightly darker Cyan for better contrast
+        COLOR_TIMESTAMP_TRAFFIC = "#CC9900"   # Darker Yellow (more readable on light BG)
+        COLOR_TIMESTAMP_BOLO = "#E59400"      # Darker Orange (adjusted for light mode)
+        COLOR_CRITICAL_UPDATE = "#CC0000"     # Slightly darker Red (more readable)
+        COLOR_CRITICAL_BG = "#FFCCCC"         # Light Red background (inverted from dark red)
+        COLOR_GPS_LOCKED = "#008000"          # Dark Green (better contrast on light BG)
+        COLOR_GPS_NO_LOCK = COLOR_TEXT_SECONDARY  # Medium Gray (unchanged reference)
+        COLOR_CONN_OK = "#008000"             # Dark Green (better contrast)
+        COLOR_CONN_BAD = COLOR_TEXT_SECONDARY # Medium Gray (unchanged reference)
+        COLOR_STATUS_OK_BG = "#CCFFCC"        # Light Green background (inverted from dark green)
+        COLOR_STATUS_BAD_BG = "#E0E0E0"       # Light Gray background (inverted from dark gray)
+        COLOR_BUTTON_BG = "#D0D0D0"           # Light Gray (lighter than dark mode)
+        COLOR_BUTTON_TEXT = COLOR_TEXT_PRIMARY  # Dark Gray (unchanged reference)
+        COLOR_BUTTON_BORDER = COLOR_ACCENT    # DeepSkyBlue (unchanged)
+        COLOR_BUTTON_DISABLED_BG = "#B0B0B0"  # Medium Gray (lighter disabled state)
+        COLOR_BUTTON_DISABLED_TEXT = "#808080"  # Gray (unchanged, still readable)
+        COLOR_BUTTON_DISABLED_BORDER = "#A0A0A0"  # Lighter Gray (adjusted for light mode)
     return
     
 def create_label(text, font_size, bold=False, color=COLOR_TEXT_PRIMARY, alignment=Qt.AlignLeft | Qt.AlignVCenter, parent=None):
@@ -264,6 +268,8 @@ def get_call_dir(officer_id, call_id):
         raise # Re-raise the error if directory creation fails critically
     return call_dir, image_dir
 
+#Execute Time check and swap color.
+swap_color_palette(check_time())
 # =============================================================================
 # Component Widgets
 # =============================================================================
@@ -272,9 +278,6 @@ class StatusBarWidget(QWidget):
     """ Widget for the top status bar including navigation. """
     # --- Signals for navigation button clicks ---\
     
-    #Call swap color palette function with check_time as a boolean value to see if it is daytime and if so swap to light mode.
-    #if check_time:    #Commented out due to issues with color palette always swapping and not caring about value of check_time
-    #  swap_color_palette()
     
     prevOfficerClicked = pyqtSignal()
     nextOfficerClicked = pyqtSignal()
