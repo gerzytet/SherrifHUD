@@ -150,7 +150,10 @@ def check_time():
     is_dst = time_zone.isDaylightTime(date_time)
     print(f"DST is {'active' if is_dst else 'not active'}")  # Debugging DST status
 
-    return is_night
+    if(is_night):
+        return True
+    else:
+        return False
     
 
 def swap_color_palette(bool): # New Function to swap to light-mode color palette
